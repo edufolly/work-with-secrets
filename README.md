@@ -34,6 +34,28 @@ smallrye.config.source.file.locations=secret-template-folder
 
 # Docker secrets path.
 %prod.smallrye.config.source.file.locations=/run/secrets
+
+# This way you can use a docker secret interpolated with a
+# datasource connection.
+my-injected=${my-secret:-not found}
+```
+
+### Endpoints
+
+#### /config
+
+Checking the base configuration from `ConfigProvider`.
+
+```shell
+curl -s http://localhost:8080/config | jq .
+```
+
+#### /injected
+
+Using the secret with a `application.properties` interpolation.
+
+```shell
+curl -s http://localhost:8080/injected | jq .
 ```
 
 ---

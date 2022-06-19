@@ -36,6 +36,7 @@ esac
 
 version=$(grep 'version' build.gradle | cut -f 2 -d "'")$suffix
 
+echo ""
 if git rev-parse "v$version^{tag}" >/dev/null 2>&1
 then
   echo "[ERROR] Tag v$version already deployed."
