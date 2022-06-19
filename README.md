@@ -1,0 +1,3 @@
+# work-with-secrets
+
+## SMALLRYE_CONFIG_SOURCE_FILE_LOCATION
