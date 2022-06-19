@@ -1,0 +1,180 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main, alpha, beta ]
+
+jobs:
+
+  ########
+  # Boot #
+  ########
+  boot:
+    name: Boot
+    runs-on: ubuntu-latest
+    outputs:
+      commit-branch: ${{ steps.branch-step.outputs.commit-branch }}
+      docker-tag: ${{ steps.branch-step.outputs.docker-tag }}
+      suffix: ${{ steps.branch-step.outputs.suffix }}
+      platform: ${{ steps.version-step.outputs.platform }}
+      repo-name: ${{ steps.version-step.outputs.repo-name }}
+      version: ${{ steps.version-step.outputs.version }}
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Check Version
+        run: ./check_version.sh
+
+      - name: Get Branch Attributes
+        id: branch-step
+        run: |
+          COMMIT_BRANCH=test/$GITHUB_REF_NAME
+          DOCKER_TAG=$GITHUB_REF_NAME
+          SUFFIX=""
+          case $GITHUB_REF_NAME in
+            main)
+              DOCKER_TAG="latest"
+              COMMIT_BRANCH="prod"
+              ;;
+            alpha)
+              SUFFIX="A"
+              ;;
+            beta)
+              SUFFIX="B"
+              ;;
+          esac
+          echo "::set-output name=commit-branch::$COMMIT_BRANCH"
+          echo "::set-output name=docker-tag::$DOCKER_TAG"
+          echo "::set-output name=suffix::$SUFFIX"
+
+      - name: Get Gradle Version
+        id: version-step
+        run: |
+          PLATFORM=$(grep 'quarkusPlatformVersion' gradle.properties | cut -f 2 -d '=')
+          echo "::set-output name=platform::$PLATFORM"
+          REPO_NAME=${GITHUB_REPOSITORY##*/}
+          echo "::set-output name=repo-name::$REPO_NAME"
+          VERSION=$(grep 'version' build.gradle | cut -f 2 -d "'")${{ steps.branch-step.outputs.suffix }}
+          echo "::set-output name=version::$VERSION"
+
+
+  #################
+  # Tests & Build #
+  #################
+  tests-build:
+    name: Tests & Build
+    needs: [ boot ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          cache: 'gradle'
+
+      - name: Get Gradle Version
+        run: |
+          sed -i "s/quarkus_platform/${{ needs.boot.outputs.platform }}/g" src/main/java/io/github/edufolly/utils/Version.java
+          sed -i "s/dev/${{ needs.boot.outputs.version }}/g" src/main/java/io/github/edufolly/utils/Version.java
+
+      - name: Tests
+        run: ./gradlew test
+
+      - name: Build
+        run: ./gradlew build -Dquarkus.package.type=native
+
+      - name: Compress Build
+        working-directory: build
+        run: tar -cvzf ${{ needs.boot.outputs.repo-name }}.tar.gz *-runner
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ needs.boot.outputs.repo-name }}
+          path: build/${{ needs.boot.outputs.repo-name }}.tar.gz
+          retention-days: 1
+
+
+  ##########
+  # Docker #
+  ##########
+  docker:
+    name: Docker Build & Push
+    needs: [ boot, tests-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Create Build Folder
+        run: mkdir -p build
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.boot.outputs.repo-name }}
+          path: build
+
+      - name: Decompress Flutter Build
+        working-directory: build
+        run: tar -xvzf ${{ needs.boot.outputs.repo-name }}.tar.gz
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Docker Build & Push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: src/main/docker/Dockerfile.native
+          tags: |
+            edufolly/${{ needs.boot.outputs.repo-name }}:${{ needs.boot.outputs.version }}
+            edufolly/${{ needs.boot.outputs.repo-name }}:${{ needs.boot.outputs.docker-tag }}
+
+
+  #################
+  # Tag & Release #
+  #################
+  tag-release:
+    name: Tag & Release
+    needs: [ boot, docker ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Commit to Branch
+        run: |
+          git checkout -b ${{ needs.boot.outputs.commit-branch }}
+          sed -i "s/quarkus_platform/${{ needs.boot.outputs.platform }}/g" src/main/java/io/github/edufolly/utils/Version.java
+          sed -i "s/dev/${{ needs.boot.outputs.version }}/g" src/main/java/io/github/edufolly/utils/Version.java
+          sed -i "s/CHECK_VERSION_IN_BRANCH_PROD/${{ needs.boot.outputs.version }}/g" docker-compose.yml
+          sed -i "s/CHECK_VERSION_IN_BRANCH_PROD/${{ needs.boot.outputs.version }}/g" README.md
+          git config --global user.email ${{ github.actor }}@users.noreply.github.com
+          git config --global user.name "GitHub Actions"
+          git add .
+          git commit -a -m 'Version ${{ needs.boot.outputs.version }} to ${{ needs.boot.outputs.commit-branch }} branch.'
+          git push origin ${{ needs.boot.outputs.commit-branch }} --force
+
+      - name: Creating GitHub Tag
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          custom_tag: ${{ needs.boot.outputs.version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ needs.boot.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}

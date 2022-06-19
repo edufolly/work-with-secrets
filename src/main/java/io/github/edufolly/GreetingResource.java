@@ -10,6 +10,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
+/**
+ * @author Eduardo Folly
+ */
 @Path("/config")
 public class GreetingResource {
 
@@ -18,11 +21,7 @@ public class GreetingResource {
     public Map<String, String> hello() {
         Config config = ConfigProvider.getConfig();
 
-        System.out.println(config.getConfigValue("my-secret"));
-
-        Iterable<ConfigSource> configSources = config.getConfigSources();
-
-        for (ConfigSource configSource : configSources) {
+        for (ConfigSource configSource : config.getConfigSources()) {
             if (configSource.getName().startsWith("FileSystemConfig")) {
                 return configSource.getProperties();
             }
