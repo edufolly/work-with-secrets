@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  base:
+    image: edufolly/work-with-secrets
+    secrets:
+      - my-secret
+    deploy:
+      mode: replicated
+      replicas: 1
+
+secrets:
+  my-secret:
+    external: true

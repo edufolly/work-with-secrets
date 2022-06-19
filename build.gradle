@@ -13,6 +13,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-resteasy-jsonb'
     implementation 'io.quarkus:quarkus-resteasy'
     implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.smallrye.config:smallrye-config-source-file-system'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
 }
