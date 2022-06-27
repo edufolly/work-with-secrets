@@ -4,21 +4,6 @@ set -e
 
 code=0
 
-# Check if 'curl' is installed.
-if ! command -v curl &> /dev/null
-then
-    echo "'curl' could not be found."
-    exit 10
-fi
-
-# Check if 'jq' is installed.
-if ! command -v jq &> /dev/null
-then
-    echo "'jq' could not be found."
-    exit 10
-fi
-
-
 ###########
 # git tag #
 ###########
