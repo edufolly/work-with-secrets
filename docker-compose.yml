@@ -5,6 +5,7 @@ services:
     image: edufolly/work-with-secrets:${VERSION:-CHECK_VERSION_IN_BRANCH_PROD}
     secrets:
       - my-secret
+      - MY_UPPERCASE_SECRET
     ports:
       - ${EXPOSED_PORT:-8080}:8080
     deploy:
@@ -13,4 +14,6 @@ services:
 
 secrets:
   my-secret:
+    external: true
+  MY_UPPERCASE_SECRET:
     external: true
