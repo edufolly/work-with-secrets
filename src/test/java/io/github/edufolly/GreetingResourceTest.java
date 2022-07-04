@@ -13,7 +13,7 @@ import static org.hamcrest.CoreMatchers.is;
 public class GreetingResourceTest {
 
     @Test
-    public void testHelloEndpoint() {
+    public void testConfigEndpoint() {
         given()
                 .when().get("/config")
                 .then()

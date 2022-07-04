@@ -1,10 +1,14 @@
 package io.github.edufolly;
 
+import io.github.edufolly.kafka.MyObject;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -22,6 +26,18 @@ public class GeneralResource {
 
     @ConfigProperty(name = "my.uppercase.secret")
     String myUppercaseSecret;
+
+    @Inject
+    @Channel("channel-out")
+    Emitter<MyObject> emitter;
+
+    @GET
+    @Path("/kafka")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String kafka() {
+        emitter.send(new MyObject("Folly", 20));
+        return "OK!";
+    }
 
     @GET
     @Path("/config")

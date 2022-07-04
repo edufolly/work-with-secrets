@@ -16,6 +16,7 @@ suffix=""
 case $branch in
   alpha) suffix="A" ;;
   beta) suffix="B" ;;
+  kafka) suffix="K" ;;
   dev) branch="main" ;;
 esac
 
