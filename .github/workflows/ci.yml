@@ -2,7 +2,7 @@ name: CI Build
 
 on:
   push:
-    branches: [ main, alpha, beta ]
+    branches: [ main, alpha, beta, kafka ]
 
 jobs:
 
@@ -42,6 +42,10 @@ jobs:
               ;;
             beta)
               SUFFIX="B"
+              ;;
+            kafka)
+              DOCKER_TAG="kafka"
+              SUFFIX="K"
               ;;
           esac
           echo "::set-output name=commit-branch::$COMMIT_BRANCH"
@@ -125,13 +129,13 @@ jobs:
         run: tar -xvzf ${{ needs.boot.outputs.repo-name }}.tar.gz
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Docker Build & Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           context: .
