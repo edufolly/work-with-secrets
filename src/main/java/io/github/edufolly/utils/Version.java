@@ -5,8 +5,8 @@ package io.github.edufolly.utils;
  */
 public class Version {
 
-    public static final String version = "dev";
+    public static final String version = "0.0.6K";
 
-    public static final String quarkus = "quarkus_platform";
+    public static final String quarkus = "2.9.2.Final";
 
 }

@@ -59,4 +59,4 @@ curl -s http://localhost:8080/injected | jq .
 ```
 
 ---
-Version: CHECK_VERSION_IN_BRANCH_PROD
+Version: 0.0.6K
