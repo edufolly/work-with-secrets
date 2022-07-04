@@ -70,6 +70,8 @@ jobs:
     name: Tests & Build
     needs: [ boot ]
     runs-on: ubuntu-latest
+    env:
+      QUARKUS_DEVSERVICES_ENABLED: false
     steps:
       - name: Code Checkout
         uses: actions/checkout@v3
@@ -90,7 +92,7 @@ jobs:
         run: ./gradlew test
 
       - name: Build
-        run: ./gradlew build -Dquarkus.package.type=native
+        run: ./gradlew build --no-daemon -Dquarkus.package.type=native
 
       - name: Compress Build
         working-directory: build
@@ -139,7 +141,7 @@ jobs:
         with:
           push: true
           context: .
-          file: src/main/docker/Dockerfile.native-micro
+          file: src/main/docker/Dockerfile.native
           tags: |
             edufolly/${{ needs.boot.outputs.repo-name }}:${{ needs.boot.outputs.version }}
             edufolly/${{ needs.boot.outputs.repo-name }}:${{ needs.boot.outputs.docker-tag }}

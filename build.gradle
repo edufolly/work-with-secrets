@@ -12,7 +12,7 @@ dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.smallrye.config:smallrye-config-source-file-system'
     implementation 'io.quarkus:quarkus-smallrye-reactive-messaging-kafka'
-    // implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
     implementation 'io.quarkus:quarkus-quartz'
     implementation 'io.quarkus:quarkus-resteasy-jsonb'
     implementation 'io.quarkus:quarkus-resteasy'
@@ -22,7 +22,7 @@ dependencies {
 }
 
 group 'io.github.edufolly'
-version '0.0.4'
+version '0.0.5'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
