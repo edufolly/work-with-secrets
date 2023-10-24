@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   base:
-    image: edufolly/work-with-secrets:${VERSION:-CHECK_VERSION_IN_BRANCH_PROD}
+    image: edufolly/work-with-secrets:${VERSION:-0.0.5}
     secrets:
       - my-secret
       - MY_UPPERCASE_SECRET
