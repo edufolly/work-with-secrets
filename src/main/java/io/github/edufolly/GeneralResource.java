@@ -1,14 +1,14 @@
 package io.github.edufolly;
 
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
 /**
@@ -20,7 +20,7 @@ public class GeneralResource {
     @ConfigProperty(name = "my-injected")
     String myInjected;
 
-    @ConfigProperty(name = "my.uppercase.secret")
+    @ConfigProperty(name = "my-uppercase-secret")
     String myUppercaseSecret;
 
     @GET
@@ -49,7 +49,7 @@ public class GeneralResource {
     @Path("/uppercase")
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, String> uppercase() {
-        return Map.of("my.uppercase.secret", myUppercaseSecret);
+        return Map.of("my-uppercase-secret", myUppercaseSecret);
     }
 
 }

@@ -17,7 +17,7 @@
 # docker run -i --rm -p 8080:8080 quarkus/work-with-secrets
 #
 ###
-FROM quay.io/quarkus/quarkus-micro-image:1.0
+FROM quay.io/quarkus/quarkus-micro-image:2.0
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
@@ -27,4 +27,7 @@ COPY --chown=1001:root build/*-runner /work/application
 EXPOSE 8080
 USER 1001
 
-CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
+HEALTHCHECK --start-period=5s --interval=15s --timeout=10s --retries=2 \
+    CMD curl --fail http://localhost:8080/q/health/live || exit 1
+
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]

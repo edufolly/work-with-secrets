@@ -1,46 +1,59 @@
 # work-with-secrets
 
 ## Motivation
- > Docker secrets do not set environment variables directly. 
- > This was a conscious decision, because environment variables can 
- > unintentionally be leaked between containers.
+
+> Docker secrets do not set environment variables directly.
+> This was a conscious decision, because environment variables can
+> unintentionally be leaked between containers.
 
 _from_: https://docs.docker.com/engine/swarm/secrets/#build-support-for-docker-secrets-into-your-images
 
 ### SmallRye FileSystem Config Source
+
 https://smallrye.io/docs/smallrye-config/main/config-sources/config-sources.html#filesystem-config-source
 
 ### Quarkus PR
+
 https://github.com/quarkusio/quarkus/pull/21478
 
 ## Implementation
 
 Using in `build.gradle`:
+
 ```groovy
 implementation 'io.smallrye.config:smallrye-config-source-file-system'
 ```
 
 Using in `pom.xml`:
+
 ```xml
+
 <dependency>
-  <groupId>io.smallrye.config</groupId>
-  <artifactId>smallrye-config-source-file-system</artifactId>
+    <groupId>io.smallrye.config</groupId>
+    <artifactId>smallrye-config-source-file-system</artifactId>
 </dependency>
 ```
 
 Check `application.properties`:
+
 ```yaml
 smallrye.config.source.file.locations=secret-template-folder
 
-# Docker secrets path.
+  # Docker secrets path.
 %prod.smallrye.config.source.file.locations=/run/secrets
 
-# This way you can use a docker secret interpolated with a
-# datasource connection.
+  # This way you can use a docker secret interpolated with a
+  # datasource connection.
 my-injected=${my-secret:-not found}
 ```
 
 ### Endpoints
+
+#### /swagger-ui
+
+Swagger UI.
+
+http://localhost:8080/swagger-ui/
 
 #### /config
 
