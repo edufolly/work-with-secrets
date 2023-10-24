@@ -27,7 +27,4 @@ COPY --chown=1001:root build/*-runner /work/application
 EXPOSE 8080
 USER 1001
 
-HEALTHCHECK --start-period=5s --interval=15s --timeout=10s --retries=2 \
-    CMD curl --fail http://localhost:8080/q/health/live || exit 1
-
 ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
