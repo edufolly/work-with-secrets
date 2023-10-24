@@ -9,8 +9,8 @@ jobs:
   #########
   # Build #
   #########
-  boot:
-    name: Boot
+  build:
+    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -75,7 +75,7 @@ jobs:
           file: src/main/docker/Dockerfile.native-micro
           tags: |
             ${{ vars.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.VERSION }}
-            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME }}:${{ env.DOCKER_TAG }}
+            ${{ vars.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.DOCKER_TAG }}
 
       - name: Commit to branch
         run: |
